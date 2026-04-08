@@ -2,7 +2,6 @@ package com.anmol.employeeportal.service;
 
 import com.anmol.employeeportal.model.Employee;
 import com.anmol.employeeportal.repository.EmployeeRepository;
-import com.anmol.employeeportal.repository.PerformanceReviewRepository;
 import com.anmol.employeeportal.dto.request.EmployeeRequest;
 import com.anmol.employeeportal.dto.response.EmployeeResponse;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +14,6 @@ import java.util.Optional;
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
-    private final PerformanceReviewRepository performanceReviewRepository;
 
     public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
         Employee employee = EmployeeMapper.toEntity(employeeRequest);
@@ -27,22 +25,13 @@ public class EmployeeService {
         return employeeRepository.findById(id);
     }
 
-    public List<EmployeeResponse> getEmployeesByDepartment(String department) {
-        return employeeRepository.findByDepartment(department)
-                .stream()
-                .map(EmployeeMapper::toResponse)
-                .toList();
+    public List<EmployeeResponse> filterEmployees(String department, Double minRating) {
+        List<Employee> employees = employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating);
+        return employees.stream().map(EmployeeMapper::toResponse).toList();
     }
 
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll()
-                .stream()
-                .map(EmployeeMapper::toResponse)
-                .toList();
-    }
-
-    public List<EmployeeResponse> getEmployeesWithMinRating(Double minRating) {
-        return performanceReviewRepository.findEmployeesWithMinRating(minRating)
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();
