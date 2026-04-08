@@ -1,33 +1,156 @@
+
 # Employee Performance Tracker API
 
-## System Design Write-up
+A robust Spring Boot backend for managing employee performance, reviews, and goal tracking in organizations.
 
-### Scaling for 500 Concurrent Managers
-To support 500 concurrent managers running reports, the system should:
-- **Use a robust RDBMS** (e.g., PostgreSQL) with connection pooling (HikariCP) to handle concurrent queries efficiently.
-- **Horizontal scaling**: Deploy multiple instances of the Spring Boot app behind a load balancer (e.g., NGINX, AWS ELB).
-- **Read replicas**: For heavy read/reporting load, use database replicas to offload reporting queries from the primary DB.
-- **Optimize queries**: Use proper indexes (as in the schema) and avoid N+1 queries with JPA fetch joins or DTO projections.
-- **Stateless services**: Ensure the backend is stateless for easy scaling.
+## Project Overview
 
-### If /cycles/{id}/summary Gets Slow at 100k+ Reviews
-- **Optimize SQL**: Use aggregate queries at the DB level (e.g., AVG, MAX, COUNT with GROUP BY) instead of in-memory aggregation.
-- **Materialized views**: Precompute and cache summary stats for each cycle, refreshing periodically or on data change.
-- **Batch processing**: For very large datasets, use background jobs to update summary tables.
-- **Profile and tune**: Use query profilers and DB EXPLAIN plans to identify bottlenecks.
+Enables HR and managers to track employee goals, submit performance reviews, analyze review cycles, and identify top performers. Designed for scalability and production use.
 
-### Caching Strategy
-- **Cache review cycle summaries**: Use Redis or in-memory cache for /cycles/{id}/summary results, with invalidation on new review/goal changes.
-- **Cache static data**: Departments, roles, and review cycle metadata can be cached at the service layer.
-- **Avoid caching per-employee reviews** unless access patterns show repeated queries for the same data.
+## Tech Stack
 
-## Assumptions
-- Employees can have multiple reviews per cycle (e.g., from different reviewers).
-- Goal status is per employee per cycle per title.
-- API is designed for internal use, so authentication is not included here.
+- Spring Boot
+- Spring Data JPA
+- PostgreSQL
+- Jakarta Bean Validation
+- Maven
+
+
+## Features / APIs
+
+- **Create Employee**
+- **Submit Review**
+- **Get Employee Reviews**
+- **Cycle Summary**: Average rating, top performer, goal stats
+- **Filter Employees**: By department & minRating, with pagination
+- **Create Goal**
 
 ---
 
-See `src/main/resources/db/migration/V1__init_performance_tracker.sql` for schema.
+## API Documentation
 
-Run with H2 or PostgreSQL. All endpoints are under `/employees`, `/reviews`, and `/cycles`.
+### 1. Create Employee
+
+- **POST** `/api/employees`
+- **Body:**
+	```json
+	{
+		"name": "Jane Doe",
+		"department": "Engineering",
+		"role": "Developer",
+		"joiningDate": "2024-01-15"
+	}
+	```
+- **Response:** Employee details
+
+### 2. Submit Review
+
+- **POST** `/api/reviews`
+- **Body:**
+	```json
+	{
+		"employeeId": 1,
+		"cycleId": 2,
+		"rating": 4,
+		"reviewerNotes": "Consistent performer"
+	}
+	```
+- **Response:** Review details
+
+### 3. Get Employee Reviews
+
+- **GET** `/api/employees/{id}/reviews`
+- **Response:** List of reviews for the employee
+
+### 4. Cycle Summary
+
+- **GET** `/api/cycles/{id}/summary`
+- **Response:**
+	```json
+	{
+		"averageRating": 4.2,
+		"topPerformer": "Jane Doe",
+		"completedGoals": 12,
+		"missedGoals": 2
+	}
+	```
+
+### 5. Filter Employees
+
+- **GET** `/api/employees?department=Engineering&minRating=3.5&page=0&size=10&sort=name`
+- **Query Params:**
+	- `department` (optional)
+	- `minRating` (optional)
+	- `page` (default: 0)
+	- `size` (default: 10)
+	- `sort` (optional, e.g., `name`)
+- **Response:** Paginated list of employees
+
+### 6. Create Goal
+
+- **POST** `/api/goals`
+- **Body:**
+	```json
+	{
+		"employeeId": 1,
+		"reviewCycleId": 2,
+		"title": "Complete Project X",
+		"status": "pending"
+	}
+	```
+- **Response:** Goal details
+
+---
+
+## Architecture
+
+- **Controller → Service → Repository** pattern
+- **DTO-based** request/response design
+- **Global Exception Handling** for consistent API errors
+
+## Database Design
+
+- **Entities**: Employee, Goal, PerformanceReview, ReviewCycle
+- **Relations**: Employees have Goals & Reviews; Reviews linked to Cycles
+
+## Key Optimizations
+
+- **Pagination**: `Pageable` for large datasets
+- **N+1 Query Fix**: `@EntityGraph` / `JOIN FETCH` for efficient loading
+- **Transaction Management**: `@Transactional` on service methods
+- **Validation**: Jakarta Bean Validation on DTOs
+
+## System Design Considerations
+
+- **Scaling**: Stateless REST, ready for horizontal scaling
+- **Caching**: Recommend Redis for frequent queries
+- **Heavy Aggregations**: Use optimized SQL/DB views for summaries
+
+## How to Run
+
+1. **Configure PostgreSQL** in `src/main/resources/application.yml`:
+	 ```yaml
+	 spring:
+		 datasource:
+			 url: jdbc:postgresql://localhost:5432/employee_db
+			 username: your_user
+			 password: your_password
+	 ```
+2. **Start Application**:
+	 ```bash
+	 mvn spring-boot:run
+	 ```
+
+## Sample API Request
+
+**Create Employee**
+```http
+POST /api/employees
+Content-Type: application/json
+
+{
+	"name": "Jane Doe",
+	"department": "Engineering",
+	"email": "jane.doe@example.com"
+}
+```

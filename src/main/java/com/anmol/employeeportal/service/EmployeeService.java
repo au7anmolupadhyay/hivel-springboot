@@ -58,7 +58,8 @@ public class EmployeeService {
                 .toList();
     }
 
-    // Dedicated Mapper class for Employee <-> DTO
+    // Dedicated Mapper class for Employee <-> DTO , we can also use mapstruct, it will reduce our work by not
+    // writing the mapper function manually
     private static class EmployeeMapper {
         private static Employee toEntity(EmployeeRequest dto) {
             Employee employee = new Employee();

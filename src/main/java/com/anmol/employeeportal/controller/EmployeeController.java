@@ -33,9 +33,9 @@ public class EmployeeController {
 
     @GetMapping("/{id}/reviews")
     public ResponseEntity<List<ReviewResponse>> getEmployeeReviews(@PathVariable Long id) {
-        Optional<Employee> empOpt = employeeService.getEmployee(id);
-        if (empOpt.isEmpty()) throw new com.anmol.employeeportal.exception.EntityNotFoundException("Employee not found");
-        List<ReviewResponse> responseList = reviewService.getReviewsByEmployee(empOpt.get());
+        Optional<Employee> employee = employeeService.getEmployee(id);
+        if (employee.isEmpty()) throw new com.anmol.employeeportal.exception.EntityNotFoundException("Employee not found");
+        List<ReviewResponse> responseList = reviewService.getReviewsByEmployee(employee.get());
         return ResponseEntity.ok(responseList);
     }
 
