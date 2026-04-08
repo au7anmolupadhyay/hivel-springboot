@@ -125,6 +125,27 @@ Relationships:
 
 ---
 
+## 🗄 Database Schema Management
+
+The database schema is defined using a SQL migration file instead of relying on Hibernate auto DDL.
+
+- **Migration File:** `src/main/resources/schema.sql`
+- Defines all tables: `employee`, `review_cycle`, `performance_review`, `goals`
+- Includes constraints: `NOT NULL`, `CHECK`, `FOREIGN KEY`
+- Optimized with indexes for query performance
+
+**Configuration:**
+
+- `spring.jpa.hibernate.ddl-auto=none`
+- `spring.sql.init.mode=always` (initial setup)
+
+After initial setup, SQL initialization can be disabled to prevent re-execution.
+
+> **Note:**
+> In production, schema evolution would be managed using tools like Flyway.
+
+---
+
 ## ⚡ Key Optimizations
 
 - **Pagination:** Spring Pageable for large datasets
