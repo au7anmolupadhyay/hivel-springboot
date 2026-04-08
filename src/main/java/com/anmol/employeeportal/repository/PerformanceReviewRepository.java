@@ -14,8 +14,11 @@ import java.util.List;
 public interface PerformanceReviewRepository extends JpaRepository<PerformanceReview, Long> {
     @EntityGraph(attributePaths = {"employee", "reviewCycle"})
     List<PerformanceReview> findByEmployee(Employee employee);
+
+    @EntityGraph(attributePaths = {"employee", "reviewCycle"})
     List<PerformanceReview> findByEmployeeAndReviewCycle(Employee employee, ReviewCycle reviewCycle);
-    @EntityGraph(attributePaths = {"employee"})
+
+    @EntityGraph(attributePaths = {"employee", "reviewCycle"})
     List<PerformanceReview> findByReviewCycle(ReviewCycle reviewCycle);
     @Query("""
         SELECT AVG(pr.rating)

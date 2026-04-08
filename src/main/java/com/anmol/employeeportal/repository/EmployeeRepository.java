@@ -12,7 +12,9 @@ import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    List<Employee> findByDepartment(String department);
+
+    @Query("SELECT e FROM Employee e LEFT JOIN FETCH e.reviews LEFT JOIN FETCH e.goals WHERE e.department = :department")
+    List<Employee> findByDepartment(@Param("department") String department);
 
 
     @Query("SELECT e FROM Employee e " +
