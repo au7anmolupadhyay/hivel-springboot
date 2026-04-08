@@ -1,3 +1,4 @@
+
 package com.anmol.employeeportal.service;
 
 import com.anmol.employeeportal.model.Employee;
@@ -5,6 +6,9 @@ import com.anmol.employeeportal.model.ReviewCycle;
 import com.anmol.employeeportal.repository.GoalRepository;
 import com.anmol.employeeportal.repository.PerformanceReviewRepository;
 import com.anmol.employeeportal.repository.ReviewCycleRepository;
+import com.anmol.employeeportal.dto.request.ReviewCycleRequest;
+import com.anmol.employeeportal.dto.response.ReviewCycleResponse;
+import com.anmol.employeeportal.dto.response.CycleSummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,32 +27,45 @@ public class ReviewCycleService {
     public Optional<ReviewCycle> getReviewCycle(Long id) {
         return reviewCycleRepository.findById(id);
     }
-    public Map<String, Object> getCycleSummary(Long cycleId) {
 
+    public ReviewCycleResponse createReviewCycle(ReviewCycleRequest request) {
+        ReviewCycle cycle = ReviewCycleMapper.toEntity(request);
+        ReviewCycle saved = reviewCycleRepository.save(cycle);
+        return ReviewCycleMapper.toResponse(saved);
+    }
+    public CycleSummaryResponse getCycleSummary(Long cycleId) {
         Double avg = performanceReviewRepository.getAverageRatingByCycleId(cycleId);
-
         List<Employee> topList = performanceReviewRepository.findTopPerformerInCycle(cycleId);
         String topPerformer = topList.isEmpty() ? null : topList.get(0).getName();
-
         List<Object[]> goalStats = goalRepository.countGoalsByStatus(cycleId);
-
         long completed = 0;
         long missed = 0;
-
         for (Object[] row : goalStats) {
             String status = (String) row[0];
             Long count = (Long) row[1];
-
             if ("COMPLETED".equalsIgnoreCase(status)) completed = count;
             if ("MISSED".equalsIgnoreCase(status)) missed = count;
         }
+        return new CycleSummaryResponse(avg, topPerformer, completed, missed);
+    }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("averageRating", avg);
-        result.put("topPerformer", topPerformer);
-        result.put("completedGoals", completed);
-        result.put("missedGoals", missed);
+    // Dedicated Mapper class for ReviewCycle <-> DTO
+    private static class ReviewCycleMapper {
+        private static ReviewCycle toEntity(ReviewCycleRequest dto) {
+            ReviewCycle cycle = new ReviewCycle();
+            cycle.setName(dto.getName());
+            cycle.setStartDate(dto.getStartDate());
+            cycle.setEndDate(dto.getEndDate());
+            return cycle;
+        }
 
-        return result;
+        private static ReviewCycleResponse toResponse(ReviewCycle cycle) {
+            ReviewCycleResponse resp = new ReviewCycleResponse();
+            resp.setId(cycle.getId());
+            resp.setName(cycle.getName());
+            resp.setStartDate(cycle.getStartDate());
+            resp.setEndDate(cycle.getEndDate());
+            return resp;
+        }
     }
 }

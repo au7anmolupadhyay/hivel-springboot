@@ -1,13 +1,12 @@
 package com.anmol.employeeportal.controller;
 
 import com.anmol.employeeportal.model.Employee;
-import com.anmol.employeeportal.model.PerformanceReview;
-import com.anmol.employeeportal.model.ReviewCycle;
 import com.anmol.employeeportal.service.EmployeeService;
 import com.anmol.employeeportal.service.PerformanceReviewService;
-import com.anmol.employeeportal.service.ReviewCycleService;
+import com.anmol.employeeportal.dto.request.EmployeeRequest;
+import com.anmol.employeeportal.dto.response.EmployeeResponse;
+import com.anmol.employeeportal.dto.response.ReviewResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,29 +20,33 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
     private final PerformanceReviewService reviewService;
-    private final ReviewCycleService cycleService;
 
     @PostMapping
-    public ResponseEntity<Employee> createEmployee(@RequestBody Employee employee) {
-        Employee saved = employeeService.createEmployee(employee);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeRequest employeeRequest) {
+        EmployeeResponse response = employeeService.createEmployee(employeeRequest);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/reviews")
-    public ResponseEntity<List<PerformanceReview>> getEmployeeReviews(@PathVariable Long id) {
+    public ResponseEntity<List<ReviewResponse>> getEmployeeReviews(@PathVariable Long id) {
         Optional<Employee> empOpt = employeeService.getEmployee(id);
         if (empOpt.isEmpty()) return ResponseEntity.notFound().build();
-        List<PerformanceReview> reviews = reviewService.getReviewsByEmployee(empOpt.get());
-        return ResponseEntity.ok(reviews);
+    List<ReviewResponse> responseList = reviewService.getReviewsByEmployee(empOpt.get());
+        return ResponseEntity.ok(responseList);
     }
 
     @GetMapping
-    public ResponseEntity<List<Employee>> filterEmployees(
+    public ResponseEntity<List<EmployeeResponse>> filterEmployees(
             @RequestParam(required = false) String department,
             @RequestParam(required = false) Double minRating) {
-        List<Employee> employees = (department != null) ? employeeService.getEmployeesByDepartment(department) : employeeService.getAllEmployees();
+        List<EmployeeResponse> employees;
+        if (department != null) {
+            employees = employeeService.getEmployeesByDepartment(department);
+        } else {
+            employees = employeeService.getAllEmployees();
+        }
         if (minRating != null) {
-            return ResponseEntity.ok(employeeService.getEmployeesWithMinRating(minRating));
+            employees = employeeService.getEmployeesWithMinRating(minRating);
         }
         return ResponseEntity.ok(employees);
     }

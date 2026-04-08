@@ -1,6 +1,8 @@
 package com.anmol.employeeportal.controller;
 
 import com.anmol.employeeportal.model.PerformanceReview;
+import com.anmol.employeeportal.dto.request.ReviewRequest;
+import com.anmol.employeeportal.dto.response.ReviewResponse;
 import com.anmol.employeeportal.model.Employee;
 import com.anmol.employeeportal.model.ReviewCycle;
 import com.anmol.employeeportal.service.EmployeeService;
@@ -24,32 +26,23 @@ public class PerformanceReviewController {
     private final ReviewCycleService cycleService;
 
     @PostMapping
-    public ResponseEntity<?> submitReview(@RequestBody PerformanceReview review) {
-
-        if (review.getEmployee() == null || review.getEmployee().getId() == null) {
+    public ResponseEntity<?> submitReview(@RequestBody ReviewRequest reviewRequest) {
+        if (reviewRequest.getEmployeeId() == null) {
             return ResponseEntity.badRequest().body("Employee ID is required");
         }
-
-        if (review.getReviewCycle() == null || review.getReviewCycle().getId() == null) {
+        if (reviewRequest.getCycleId() == null) {
             return ResponseEntity.badRequest().body("Review Cycle ID is required");
         }
-
-        Optional<Employee> empOpt = employeeService.getEmployee(review.getEmployee().getId());
-        Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(review.getReviewCycle().getId());
-
+        Optional<Employee> empOpt = employeeService.getEmployee(reviewRequest.getEmployeeId());
+        Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(reviewRequest.getCycleId());
         if (empOpt.isEmpty() || cycleOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Invalid employee or review cycle");
         }
-
-        review.setEmployee(empOpt.get());
-        review.setReviewCycle(cycleOpt.get());
-        review.setSubmittedAt(LocalDateTime.now());
-
         try {
-            PerformanceReview saved = reviewService.submitReview(review);
-            return ResponseEntity.ok(saved);
+            ReviewResponse response = reviewService.submitReview(reviewRequest, empOpt.get(), cycleOpt.get());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 check console
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("Error saving review");
         }
     }

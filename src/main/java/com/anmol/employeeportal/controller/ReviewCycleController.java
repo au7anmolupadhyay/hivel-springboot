@@ -6,6 +6,7 @@ import com.anmol.employeeportal.model.Goal;
 import com.anmol.employeeportal.service.ReviewCycleService;
 import com.anmol.employeeportal.service.PerformanceReviewService;
 import com.anmol.employeeportal.service.GoalService;
+import com.anmol.employeeportal.dto.response.CycleSummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,10 @@ public class ReviewCycleController {
     private final GoalService goalService;
 
     @GetMapping("/{id}/summary")
-    public ResponseEntity<?> getCycleSummary(@PathVariable Long id) {
+    public ResponseEntity<CycleSummaryResponse> getCycleSummary(@PathVariable Long id) {
         Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(id);
         if (cycleOpt.isEmpty()) return ResponseEntity.notFound().build();
-
-        return ResponseEntity.ok(cycleService.getCycleSummary(id));
+        CycleSummaryResponse response = cycleService.getCycleSummary(id);
+        return ResponseEntity.ok(response);
     }
 }
