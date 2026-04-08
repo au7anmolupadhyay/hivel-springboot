@@ -49,6 +49,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, WebRequest request) {
+        // Log the full stack trace for debugging
+        ex.printStackTrace();
         Map<String, Object> body = new HashMap<>();
         body.put("message", "An unexpected error occurred");
         body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());

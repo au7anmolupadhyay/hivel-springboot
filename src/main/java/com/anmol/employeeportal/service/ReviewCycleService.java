@@ -1,6 +1,7 @@
 
 package com.anmol.employeeportal.service;
 
+import com.anmol.employeeportal.enums.GoalStatus;
 import com.anmol.employeeportal.model.Employee;
 import com.anmol.employeeportal.model.ReviewCycle;
 import com.anmol.employeeportal.repository.GoalRepository;
@@ -38,18 +39,28 @@ public class ReviewCycleService {
     }
     @Transactional(readOnly = true)
     public CycleSummaryResponse getCycleSummary(Long cycleId) {
+
         Double avg = performanceReviewRepository.getAverageRatingByCycleId(cycleId);
+        if (avg == null) avg = 0.0;
+
         List<Employee> topList = performanceReviewRepository.findTopPerformerInCycle(cycleId);
         String topPerformer = topList.isEmpty() ? null : topList.get(0).getName();
+
         List<Object[]> goalStats = goalRepository.countGoalsByStatus(cycleId);
+
         long completed = 0;
         long missed = 0;
+
         for (Object[] row : goalStats) {
-            String status = (String) row[0];
-            Long count = (Long) row[1];
-            if ("COMPLETED".equalsIgnoreCase(status)) completed = count;
-            if ("MISSED".equalsIgnoreCase(status)) missed = count;
+            GoalStatus status = (GoalStatus) row[0];
+
+            Number countNum = (Number) row[1];   // 🔥 FIX
+            long count = countNum.longValue();
+
+            if (status == GoalStatus.COMPLETED) completed = count;
+            if (status == GoalStatus.MISSED) missed = count;
         }
+
         return new CycleSummaryResponse(avg, topPerformer, completed, missed);
     }
 
