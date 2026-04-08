@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: employeeportal
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/employee_portal
+    username: your_username
+    password: your_password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
