@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 @Service
 @RequiredArgsConstructor
@@ -26,12 +27,26 @@ public class EmployeeService {
     }
 
     public List<EmployeeResponse> filterEmployees(String department, Double minRating) {
-        List<Employee> employees = employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating);
-        return employees.stream().map(EmployeeMapper::toResponse).toList();
+        // fallback to old behavior for backward compatibility
+        return employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating, Pageable.unpaged())
+                .stream().map(EmployeeMapper::toResponse).toList();
+    }
+
+
+    public List<EmployeeResponse> filterEmployees(String department, Double minRating, Pageable pageable) {
+        return employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating, pageable)
+                .stream().map(EmployeeMapper::toResponse).toList();
     }
 
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll()
+                .stream()
+                .map(EmployeeMapper::toResponse)
+                .toList();
+    }
+
+    public List<EmployeeResponse> getAllEmployees(Pageable pageable) {
+        return employeeRepository.findAll(pageable)
                 .stream()
                 .map(EmployeeMapper::toResponse)
                 .toList();

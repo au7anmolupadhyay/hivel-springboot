@@ -8,6 +8,9 @@ import com.anmol.employeeportal.dto.response.EmployeeResponse;
 import com.anmol.employeeportal.dto.response.ReviewResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -39,12 +42,18 @@ public class EmployeeController {
     @GetMapping
     public ResponseEntity<List<EmployeeResponse>> filterEmployees(
             @RequestParam(required = false) String department,
-            @RequestParam(required = false) Double minRating) {
-        // If both filters are null, return all employees
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort
+    ) {
+        Pageable pageable = (sort != null && !sort.isEmpty())
+                ? PageRequest.of(page, size, Sort.by(sort))
+                : PageRequest.of(page, size);
+
         if (department == null && minRating == null) {
-            return ResponseEntity.ok(employeeService.getAllEmployees());
+            return ResponseEntity.ok(employeeService.getAllEmployees(pageable));
         }
-        // Otherwise, use combined filter
-        return ResponseEntity.ok(employeeService.filterEmployees(department, minRating));
+        return ResponseEntity.ok(employeeService.filterEmployees(department, minRating, pageable));
     }
 }
