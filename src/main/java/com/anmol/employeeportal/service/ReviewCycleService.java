@@ -46,6 +46,7 @@ public class ReviewCycleService {
         List<Employee> topList = performanceReviewRepository.findTopPerformerInCycle(cycleId);
         String topPerformer = topList.isEmpty() ? null : topList.get(0).getName();
 
+
         List<Object[]> goalStats = goalRepository.countGoalsByStatus(cycleId);
 
         long completed = 0;
@@ -53,8 +54,7 @@ public class ReviewCycleService {
 
         for (Object[] row : goalStats) {
             GoalStatus status = (GoalStatus) row[0];
-
-            Number countNum = (Number) row[1];   // 🔥 FIX
+            Number countNum = (Number) row[1];
             long count = countNum.longValue();
 
             if (status == GoalStatus.COMPLETED) completed = count;

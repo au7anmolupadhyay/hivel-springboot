@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "performance_review")
 @Data
 public class PerformanceReview {
     @Id

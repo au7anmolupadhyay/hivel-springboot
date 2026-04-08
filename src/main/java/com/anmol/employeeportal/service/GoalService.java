@@ -53,10 +53,16 @@ public class GoalService {
             goal.setReviewCycle(reviewCycle);
             goal.setTitle(dto.getTitle());
             // Convert String to Enum, fallback to PENDING if invalid
+            String statusStr = dto.getStatus();
+
+            if (statusStr == null) {
+                throw new IllegalArgumentException("Status cannot be null");
+            }
+
             try {
-                goal.setStatus(GoalStatus.valueOf(dto.getStatus().toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid goal status: " + dto.getStatus());
+                goal.setStatus(GoalStatus.valueOf(statusStr.trim().toUpperCase()));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Invalid goal status: " + statusStr);
             }
             return goal;
         }

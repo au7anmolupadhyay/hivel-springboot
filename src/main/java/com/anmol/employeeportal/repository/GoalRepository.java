@@ -17,11 +17,6 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     @EntityGraph(attributePaths = {"employee", "reviewCycle"})
     List<Goal> findByReviewCycle(ReviewCycle reviewCycle);
-    @Query("""
-SELECT g.status, COUNT(g)
-FROM Goal g
-WHERE g.reviewCycle.id = :cycleId
-GROUP BY g.status
-""")
+    @Query("SELECT g.status, COUNT(g.id) FROM Goal g WHERE g.reviewCycle.id = :cycleId GROUP BY g.status")
     List<Object[]> countGoalsByStatus(Long cycleId);
 }

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
+@Table(name = "review_cycle")
 @Data
 public class ReviewCycle {
     @Id
