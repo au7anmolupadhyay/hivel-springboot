@@ -25,9 +25,9 @@ public class ReviewCycleController {
 
     @GetMapping("/{id}/summary")
     public ResponseEntity<CycleSummaryResponse> getCycleSummary(@PathVariable Long id) {
-        Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(id);
-        if (cycleOpt.isEmpty()) return ResponseEntity.notFound().build();
-        CycleSummaryResponse response = cycleService.getCycleSummary(id);
-        return ResponseEntity.ok(response);
+    Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(id);
+    if (cycleOpt.isEmpty()) throw new com.anmol.employeeportal.exception.EntityNotFoundException("Review cycle not found");
+    CycleSummaryResponse response = cycleService.getCycleSummary(id);
+    return ResponseEntity.ok(response);
     }
 }

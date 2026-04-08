@@ -27,14 +27,9 @@ public class PerformanceReviewController {
         Optional<Employee> empOpt = employeeService.getEmployee(reviewRequest.getEmployeeId());
         Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(reviewRequest.getCycleId());
         if (empOpt.isEmpty() || cycleOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid employee or review cycle");
+            throw new com.anmol.employeeportal.exception.EntityNotFoundException("Invalid employee or review cycle");
         }
-        try {
-            ReviewResponse response = reviewService.submitReview(reviewRequest, empOpt.get(), cycleOpt.get());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error saving review");
-        }
+        ReviewResponse response = reviewService.submitReview(reviewRequest, empOpt.get(), cycleOpt.get());
+        return ResponseEntity.ok(response);
     }
 }
