@@ -24,12 +24,12 @@ public class PerformanceReviewController {
 
     @PostMapping
     public ResponseEntity<?> submitReview(@Valid @RequestBody ReviewRequest reviewRequest) {
-        Optional<Employee> empOpt = employeeService.getEmployee(reviewRequest.getEmployeeId());
+        Optional<Employee> employee = employeeService.getEmployee(reviewRequest.getEmployeeId());
         Optional<ReviewCycle> cycleOpt = cycleService.getReviewCycle(reviewRequest.getCycleId());
-        if (empOpt.isEmpty() || cycleOpt.isEmpty()) {
+        if (employee.isEmpty() || cycleOpt.isEmpty()) {
             throw new com.anmol.employeeportal.exception.EntityNotFoundException("Invalid employee or review cycle");
         }
-        ReviewResponse response = reviewService.submitReview(reviewRequest, empOpt.get(), cycleOpt.get());
+        ReviewResponse response = reviewService.submitReview(reviewRequest, employee.get(), cycleOpt.get());
         return ResponseEntity.ok(response);
     }
 }
