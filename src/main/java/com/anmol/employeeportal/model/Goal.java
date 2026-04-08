@@ -1,5 +1,6 @@
     package com.anmol.employeeportal.model;
 
+    import com.anmol.employeeportal.enums.GoalStatus;
     import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
     import jakarta.persistence.*;
     import lombok.Data;
@@ -25,7 +26,8 @@
         @Column(nullable = false)
         private String title;
 
+        @Enumerated(EnumType.STRING)
         @Column(nullable = false)
-        private String status; // pending, completed, missed
+        private GoalStatus status; // PENDING, COMPLETED, MISSED
 
     }
