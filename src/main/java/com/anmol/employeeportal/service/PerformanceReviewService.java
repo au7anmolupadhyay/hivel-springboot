@@ -9,6 +9,7 @@ import com.anmol.employeeportal.dto.request.ReviewRequest;
 import com.anmol.employeeportal.dto.response.ReviewResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.List;
@@ -18,12 +19,14 @@ public class PerformanceReviewService {
     @Autowired
     private PerformanceReviewRepository performanceReviewRepository;
 
+    @Transactional
     public ReviewResponse submitReview(ReviewRequest dto, Employee employee, ReviewCycle cycle) {
         PerformanceReview review = ReviewMapper.toEntity(dto, employee, cycle);
         PerformanceReview saved = performanceReviewRepository.save(review);
         return ReviewMapper.toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getReviewsByEmployee(Employee employee) {
         return performanceReviewRepository.findByEmployee(employee)
                 .stream()
@@ -31,6 +34,7 @@ public class PerformanceReviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReviewResponse> getReviewsByReviewCycle(ReviewCycle reviewCycle) {
         return performanceReviewRepository.findByReviewCycle(reviewCycle)
                 .stream()

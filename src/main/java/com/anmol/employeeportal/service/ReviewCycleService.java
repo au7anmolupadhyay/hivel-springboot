@@ -11,6 +11,7 @@ import com.anmol.employeeportal.dto.response.ReviewCycleResponse;
 import com.anmol.employeeportal.dto.response.CycleSummaryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,15 +25,18 @@ public class ReviewCycleService {
     private final PerformanceReviewRepository performanceReviewRepository;
     private final GoalRepository goalRepository;
 
+    @Transactional(readOnly = true)
     public Optional<ReviewCycle> getReviewCycle(Long id) {
         return reviewCycleRepository.findById(id);
     }
 
+    @Transactional
     public ReviewCycleResponse createReviewCycle(ReviewCycleRequest request) {
         ReviewCycle cycle = ReviewCycleMapper.toEntity(request);
         ReviewCycle saved = reviewCycleRepository.save(cycle);
         return ReviewCycleMapper.toResponse(saved);
     }
+    @Transactional(readOnly = true)
     public CycleSummaryResponse getCycleSummary(Long cycleId) {
         Double avg = performanceReviewRepository.getAverageRatingByCycleId(cycleId);
         List<Employee> topList = performanceReviewRepository.findTopPerformerInCycle(cycleId);

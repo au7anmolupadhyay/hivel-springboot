@@ -6,6 +6,7 @@ import com.anmol.employeeportal.dto.request.EmployeeRequest;
 import com.anmol.employeeportal.dto.response.EmployeeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import org.springframework.data.domain.Pageable;
@@ -13,19 +14,21 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class EmployeeService {
-
     private final EmployeeRepository employeeRepository;
 
+    @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest employeeRequest) {
         Employee employee = EmployeeMapper.toEntity(employeeRequest);
         Employee saved = employeeRepository.save(employee);
         return EmployeeMapper.toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public Optional<Employee> getEmployee(Long id) {
         return employeeRepository.findById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> filterEmployees(String department, Double minRating) {
         // fallback to old behavior for backward compatibility
         return employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating, Pageable.unpaged())
@@ -33,11 +36,13 @@ public class EmployeeService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> filterEmployees(String department, Double minRating, Pageable pageable) {
         return employeeRepository.findEmployeesByDepartmentAndMinRating(department, minRating, pageable)
                 .stream().map(EmployeeMapper::toResponse).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll()
                 .stream()
@@ -45,6 +50,7 @@ public class EmployeeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees(Pageable pageable) {
         return employeeRepository.findAll(pageable)
                 .stream()

@@ -9,6 +9,7 @@ import com.anmol.employeeportal.dto.request.GoalRequest;
 import com.anmol.employeeportal.dto.response.GoalResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -17,12 +18,17 @@ public class GoalService {
     @Autowired
     private GoalRepository goalRepository;
 
+    @Transactional
     public GoalResponse createGoal(GoalRequest request, Employee employee, ReviewCycle reviewCycle) {
         Goal goal = GoalMapper.toEntity(request, employee, reviewCycle);
         Goal saved = goalRepository.save(goal);
+//        if (true) {
+//            throw new RuntimeException("Test rollback");
+//        }
         return GoalMapper.toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<GoalResponse> getGoalsByEmployeeAndCycle(Employee employee, ReviewCycle reviewCycle) {
         return goalRepository.findByEmployeeAndReviewCycle(employee, reviewCycle)
                 .stream()
@@ -30,6 +36,7 @@ public class GoalService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<GoalResponse> getGoalsByReviewCycle(ReviewCycle reviewCycle) {
         return goalRepository.findByReviewCycle(reviewCycle)
                 .stream()
